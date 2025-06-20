@@ -1,4 +1,4 @@
-name: Build and Release dist.tar.gz
+name: Build and Release Function Package
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  build-and-release:
+  release:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,22 +23,16 @@ jobs:
       run: tar -czvf dist.tar.gz dist/
 
     - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist.tar.gz
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref_name }}
-        release_name: Release ${{ github.ref_name }}
-        draft: false
-        prerelease: false
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist.tar.gz
-        asset_name: dist.tar.gz
-        asset_content_type: application/gzip
+    - name: Trigger main-app registration
+      run: |
+        echo "🚀 Triggering main-app repo via repository_dispatch..."
+        curl -X POST https://api.github.com/repos/Shashankpgit/main-app/dispatches \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
+          -d '{"event_type": "function-package-released"}'
