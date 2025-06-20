@@ -1,0 +1,29 @@
+name: Build and Package Functionality
+
+on:
+  push:
+    tags:
+      - 'v*'  # Runs when tag like v1.0.0 is pushed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create dist directory
+      run: mkdir dist
+
+    - name: Copy source code to dist
+      run: cp -r src dist/
+
+    - name: Create dist.tar.gz
+      run: tar -czvf dist.tar.gz dist/
+
+    # - name: Upload Artifact
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: dist-tarball
+    #     path: dist.tar.gz
